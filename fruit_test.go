@@ -6,17 +6,21 @@ import (
 
 type TFruitName (string)
 
-const (
-	_                 = iota
-	Apple  TFruitName = "Apple"
-	Banana TFruitName = "Banana"
-	Cherry TFruitName = "Cherry"
-	Grape  TFruitName = "Grape"
-	Mango  TFruitName = "Mango"
-	Orange TFruitName = "Orange"
-)
+type MyFruit struct {
+	QItem[MyFruit]
+	T TFruitName
+}
 
 func (f TFruitName) String() string {
+	const (
+		Apple  TFruitName = "Apple"
+		Banana TFruitName = "Banana"
+		Cherry TFruitName = "Cherry"
+		Grape  TFruitName = "Grape"
+		Mango  TFruitName = "Mango"
+		Orange TFruitName = "Orange"
+	)
+
 	return map[TFruitName]string{
 		Apple:  "Apple",
 		Banana: "Banana",
@@ -27,15 +31,10 @@ func (f TFruitName) String() string {
 	}[f]
 }
 
-type Fruit struct {
-	QItem[Fruit]
-	T TFruitName
-}
-
-func (ctx Fruit) Index() int {
+func (ctx MyFruit) Index() int {
 	return int(time.Now().Unix())
 }
 
-func (ctx Fruit) Key() string {
+func (ctx MyFruit) Key() string {
 	return ctx.T.String()
 }

@@ -1,43 +1,60 @@
 package compakq
 
 import (
+	"log"
 	"testing"
 	"time"
 )
 
 func TestMe(t *testing.T) {
-	q := NewQueue(QueueOptions[Fruit]{
-		Capacity: 3,
-		Throttle: 500,
-		OnInit: func(queue *QueueStack[Fruit]) error {
-			queue.Push(&Fruit{T: "Apple"})
-			queue.Push(&Fruit{T: "Banana"})
-			queue.Push(&Fruit{T: "Cherry"})
-			queue.Push(&Fruit{T: "Grape"})
-			queue.Push(&Fruit{T: "Mango"})
-			queue.Push(&Fruit{T: "Orange"})
+	onInit := func() OnInitFunc[MyFruit] {
+		return func(queue *QueueStack[MyFruit]) error {
+			queue.Push(&MyFruit{T: "Apple"})
+			queue.Push(&MyFruit{T: "Banana"})
+			queue.Push(&MyFruit{T: "Cherry"})
+			queue.Push(&MyFruit{T: "Grape"})
+			queue.Push(&MyFruit{T: "Mango"})
+			queue.Push(&MyFruit{T: "Orange"})
 
 			return nil
-		},
-		Pulling: func(queue *QueueStack[Fruit]) (item *Fruit, err error) {
-			queue.Push(&Fruit{T: "Banana"})
-			queue.Push(&Fruit{T: "Mango"})
-
-			return nil, err
-		},
-		Handling: func(queue *QueueStack[Fruit], item *Fruit) error {
+		}
+	}
+	onPulling := func() PullingFunc[MyFruit] {
+		return func(queue *QueueStack[MyFruit]) (*MyFruit, error) {
+			return nil, nil
+		}
+	}
+	onHandling := func() HandlingFunc[MyFruit] {
+		return func(queue *QueueStack[MyFruit], item *MyFruit) error {
 			time.Sleep(time.Duration(2) * time.Second)
 			return nil
-		},
-		OnPulled: func(item *Fruit) {
+		}
+	}
+	onPulled := func() OnPulledFunc[MyFruit] {
+		return func(item *MyFruit) {
 			t.Log("Item pushed", item.Key())
-		},
-		OnAck: func(item *Fruit) {
+		}
+	}
+	onAcknowledge := func() OnAckFunc[MyFruit] {
+		return func(item *MyFruit) {
 			t.Log("Item consumed", item.Key())
-		},
-		OnError: func(err error) {
-			t.Fatal(err)
-		},
+		}
+	}
+	onError := func() OnErrorFunc {
+		return func(err error) {
+			log.Fatal(err)
+		}
+	}
+
+	q := NewQueue(QueueOptions[MyFruit]{
+		Capacity: 3,
+		Throttle: 500,
+		OnInit:   onInit(),
+		Pulling:  onPulling(),
+		Handling: onHandling(),
+		OnPulled: onPulled(),
+		OnAck:    onAcknowledge(),
+		OnError:  onError(),
 	})
 
 	q.WaitTermination()
